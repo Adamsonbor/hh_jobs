@@ -4,7 +4,7 @@ import psycopg2 as pg
 from dotenv import load_dotenv
 
 def get_connect():
-    load_dotenv(".env")
+    load_dotenv("../.env")
     DBNAME = os.getenv("DBNAME")
     DBUSER = os.getenv("DBUSER")
     DBPASSWORD = os.getenv("DBPASSWORD")
