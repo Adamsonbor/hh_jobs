@@ -21,21 +21,21 @@ def create_tables(conn, cursor):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS employment (
-        id BIGINT NOT NULL PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
         )
                    """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS schedule (
-        id BIGINT NOT NULL PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
         )
                    """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS experience (
-        id BIGINT NOT NULL PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
         )
                    """)
@@ -49,7 +49,7 @@ def create_tables(conn, cursor):
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS department (
-        id BIGINT NOT NULL PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
         )
                    """)
@@ -84,7 +84,7 @@ def create_tables(conn, cursor):
                    """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS proffesional_role (
+    CREATE TABLE IF NOT EXISTS professional_role (
         id BIGINT NOT NULL PRIMARY KEY,
         name text NOT NULL
         )
@@ -100,12 +100,10 @@ def create_tables(conn, cursor):
         address TEXT,
         contacts TEXT,
         description TEXT,
-        employer_name TEXT,
         created_at TIMESTAMP,
         area_id BIGINT REFERENCES area (id) ON UPDATE CASCADE,
         department_id BIGINT REFERENCES department (id) ON UPDATE CASCADE,
         employer_id BIGINT REFERENCES employer (id) ON UPDATE CASCADE,
-        proffesional_role_id BIGINT REFERENCES proffesional_role (id) ON UPDATE CASCADE,
         employment_id BIGINT REFERENCES employment (id) ON UPDATE CASCADE,
         schedule_id BIGINT REFERENCES schedule (id) ON UPDATE CASCADE,
         experience_id BIGINT REFERENCES experience (id) ON UPDATE CASCADE
@@ -123,6 +121,13 @@ def create_tables(conn, cursor):
     CREATE TABLE IF NOT EXISTS vacancy_skill (
         vacancy_id BIGINT REFERENCES vacancy (id) ON UPDATE CASCADE ON DELETE CASCADE, 
         skill_id BIGINT REFERENCES skill (id) ON UPDATE CASCADE
+        )
+                   """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS vacancy_professional_role (
+        vacancy_id BIGINT REFERENCES vacancy (id) ON UPDATE CASCADE ON DELETE CASCADE, 
+        professional_role_id BIGINT REFERENCES professional_role (id) ON UPDATE CASCADE
         )
                    """)
 

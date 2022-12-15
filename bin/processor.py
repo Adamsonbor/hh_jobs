@@ -30,7 +30,11 @@ class Processor:
             names = [item["name"] for item in json["specializations"]]
             profarea_ids = [int(item["profarea_id"]) for item in json["specializations"]]
             profarea_names = [item["profarea_name"] for item in json["specializations"]]
-            return list(zip(ids, names, profarea_ids, profarea_names))
+            out = []
+            for item in zip(ids, names, profarea_ids, profarea_names):
+                out.append({"specialization_id":item[0], "specialization_name":item[1],
+                            "profarea_id":item[2], "profarea_name":item[3]})
+            return out
         except:
             return None
 
@@ -39,7 +43,10 @@ class Processor:
         try:
             ids = [item["id"] for item in json["professional_roles"]]
             names = [item["name"] for item in json["professional_roles"]]
-            return list(zip(ids, names))
+            out = []
+            for role in zip(ids, names):
+                out.append({"professional_role_id":role[0], "professional_role_name":role[1]})
+            return out
         except:
             return None, None
     
@@ -62,6 +69,7 @@ class Processor:
             data["department_id"] = self.get_param(item, "department", "id")
             data["department_name"] = self.get_param(item, "department", "name")
             data["address"] = self.get_param(item, "address", "raw")
+            data["contacts"] = self.get_param(item, "contacts")
             data["experience"] = self.get_param(item, "experience", "name")
             data["schedule"] = self.get_param(item, "schedule", "name")
             data["employment"] = self.get_param(item, "employment", "name")
