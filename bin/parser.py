@@ -14,6 +14,7 @@ class Parser:
         self.idxs = []
         self.pages = []
         self.headers = headers
+        self.timeout = 100
 
 
     # def get_json(self, www=""):
@@ -84,8 +85,7 @@ class Parser:
     
     async def async_get_page_idxs(self, sess, params=[], page=0):
         request = self.url(params)
-        self.idxs = []
-        async with sess.get(f"{request}&page={page}") as res:
+        async with sess.get(f"{request}&page={page}", timeout=self.timeout) as res:
             if self.status_200(res.status):
                 json_data = await res.json()
                 self.idxs.extend([str(item["id"]) for item in json_data["items"]])
@@ -93,14 +93,15 @@ class Parser:
 
 
     async def async_get_vacancy(self, session, idx):
-        async with session.get(f"{self.www}vacancies/{idx}") as res:
+        async with session.get(f"{self.www}vacancies/{idx}", timeout=self.timeout) as res:
             if self.status_200(res.status):
                 self.vacancies.append(await res.json())
-                print(f"{len(self.vacancies):04} / {self.pages * 20} \r", end="")
+                print(f"{len(self.vacancies):04} / {len(self.idxs)} \r", end="")
 
 
     async def async_full_vacancies(self, idxs=[]):
         tasks = []
+        self.idxs = idxs
         async with ClientSession(headers=self.headers) as sess:
             for idx in idxs:
                 tasks.append(self.async_get_vacancy(sess, idx))
@@ -109,8 +110,9 @@ class Parser:
 
     async def async_get_idxs(self, pages=[], params={}):
         tasks = []
+        self.idxs = []
         async with ClientSession(headers=self.headers) as sess:
-            for page in range(pages):
+            for page in range(pages - 1):
                 tasks.append(self.async_get_page_idxs(sess, params, page))
             await asyncio.gather(*tasks)
 
@@ -122,13 +124,14 @@ class Parser:
         await self.async_full_vacancies(self.idxs)
 
 
-    def vacancies(self, idxs):
+    def get_vacancies(self, idxs):
         asyncio.run(self.async_full_vacancies(idxs))
+        return self.vacancies
 
 
     def get_idxs(self, pages=[], params={}):
         asyncio.run(self.async_get_idxs(pages, params))
-        return set(self.idxs)
+        return self.idxs
 
     
     def __call__(self, params):

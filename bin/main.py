@@ -17,7 +17,8 @@ DBHOST = os.getenv("DBHOST")
 DBPORT = os.getenv("DBPORT")
 
 headers = {
-    "User-Agent":"Mozilla/5.0"
+    "User-Agent":"Mozilla/5.0",
+    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
     }
 
 conn = pg.connect(dbname=DBNAME,
@@ -43,13 +44,16 @@ def main():
     pages = parser.get_pages(params)
     idxs = parser.get_idxs(pages, params)
     old_idxs = db.vacancy.get("id")
-    idxs = idxs - set(str(item) for item in old_idxs)
-    vacancies = parser.vacancies(idxs)
+    idxs = set(idxs) - set(str(item) for item in old_idxs)
+    vacancies = parser.get_vacancies(idxs)
+    save_json(vacancies, f"../source/new4_vacancies.json")
     db(vacancies)
-    db.commit()
 
-
-    
+    # with open("../source/new4_vacancies.json", "r") as file:
+    #     data = load(file)
+    #     processor(data)
+    #     db(processor.data)
+    #     db.commit()
 
 
 if __name__ == "__main__":

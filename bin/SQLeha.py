@@ -32,14 +32,12 @@ class Base:
     
 
     def id_by_name(self, name):
-        self.cursor.execute(f"""
-            SELECT (id, name) FROM {self}
-            WHERE name LIKE {name}""")
-        data = self.cursor.fetchall()
-        try:
-            return str(data[0][0])
-        except:
-            return None
+        if name is not None:
+            self.cursor.execute(f"""
+                SELECT id, name FROM {self}
+                WHERE name LIKE '{name}'""")
+            data = self.cursor.fetchall()
+            return data[0][0] if len(data) != 0 else None
 
 
     def __repr__(self):
@@ -185,11 +183,13 @@ class SQLeha:
 
     
     def __call__(self, json_list):
+        idxs = self.vacancy.get("id")
+        json_list = [item for item in json_list if item["id"] not in idxs]
         for item in json_list:
             self.save(item)
+        print(f"{len(json_list)} saved!")
 
 
     def __del__(self):
         self.cursor.close()
         self.conn.close()
-
