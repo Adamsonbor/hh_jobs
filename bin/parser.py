@@ -100,19 +100,27 @@ class Parser:
 
 
     async def async_full_vacancies(self, idxs=[]):
-        tasks = []
+        self.vacancies = []
         self.idxs = idxs
+        idxs = list(idxs)
+        p = len(idxs) // 10
         async with ClientSession(headers=self.headers) as sess:
-            for idx in idxs:
-                tasks.append(self.async_get_vacancy(sess, idx))
-            await asyncio.gather(*tasks)
+            for i in range(0, len(idxs), p):
+                tasks = []
+                for idx in idxs[i:i + p]:
+                    tasks.append(self.async_get_vacancy(sess, idx))
+                await asyncio.gather(*tasks)
 
 
-    async def async_get_idxs(self, pages=[], params={}):
-        tasks = []
+    async def async_get_idxs(self, pages, params={}):
         self.idxs = []
         async with ClientSession(headers=self.headers) as sess:
-            for page in range(pages - 1):
+            tasks = []
+            for page in range(pages//2):
+                tasks.append(self.async_get_page_idxs(sess, params, page))
+            await asyncio.gather(*tasks)
+            tasks = []
+            for page in range(pages//2, page):
                 tasks.append(self.async_get_page_idxs(sess, params, page))
             await asyncio.gather(*tasks)
 
@@ -129,7 +137,7 @@ class Parser:
         return self.vacancies
 
 
-    def get_idxs(self, pages=[], params={}):
+    def get_idxs(self, pages, params={}):
         asyncio.run(self.async_get_idxs(pages, params))
         return self.idxs
 

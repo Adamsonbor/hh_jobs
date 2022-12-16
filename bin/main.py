@@ -37,17 +37,23 @@ def main():
 
     date_from = datetime.now().date() - timedelta(days=1)
     params = {"industry":7, "date_from":str(date_from)}
+    date = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
     parser = Parser(headers)
     processor = Processor()
     db = SQLeha(conn)
+
     pages = parser.get_pages(params)
+
     idxs = parser.get_idxs(pages, params)
     old_idxs = db.vacancy.get("id")
     idxs = set(idxs) - set(str(item) for item in old_idxs)
+
     vacancies = parser.get_vacancies(idxs)
-    save_json(vacancies, f"../source/new4_vacancies.json")
+    vacancies = processor(vacancies)
+    save_json(vacancies, f"../source/{date}_vacancies.json")
     db(vacancies)
+    db.commit()
 
     # with open("../source/new4_vacancies.json", "r") as file:
     #     data = load(file)
