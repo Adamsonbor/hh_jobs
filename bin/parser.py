@@ -103,13 +103,14 @@ class Parser:
         self.vacancies = []
         self.idxs = idxs
         idxs = list(idxs)
-        p = len(idxs) // 10
-        async with ClientSession(headers=self.headers) as sess:
-            for i in range(0, len(idxs), p):
-                tasks = []
-                for idx in idxs[i:i + p]:
-                    tasks.append(self.async_get_vacancy(sess, idx))
-                await asyncio.gather(*tasks)
+        step = len(idxs) // 10
+        if step != 0:
+            async with ClientSession(headers=self.headers) as sess:
+                for i in range(0, len(idxs), step):
+                    tasks = []
+                    for idx in idxs[i:i + step]:
+                        tasks.append(self.async_get_vacancy(sess, idx))
+                    await asyncio.gather(*tasks)
 
 
     async def async_get_idxs(self, pages, params={}):
