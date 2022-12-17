@@ -1,8 +1,6 @@
 import asyncio
-from time import sleep
 from aiohttp import ClientSession
 from requests import get, Session
-from tqdm import tqdm
 
 
 class Parser:
@@ -15,50 +13,6 @@ class Parser:
         self.pages = []
         self.headers = headers
         self.timeout = 100
-
-
-    # def get_json(self, www=""):
-    #     data = get(self.www + www, headers=self.headers)
-    #     if data.status_code == 200:
-    #         return data.json()
-    #     else:
-    #         print(data.status_code)
-    
-
-    # def get_vacancies(self, params={}):
-    #     request = "vacancies?" + "&".join([key + '=' + str(value) for key, value in params.items()])
-    #     json_data = self.get_json(request)
-    #     if json_data:
-    #         for i in tqdm(range(json_data["pages"])):
-    #             list_data = self.get_json(f"{request}&page={i}")["items"]
-    #             if list_data:
-    #                 self.vacancies.extend(list_data)
-    #             else:
-    #                 print(f"[ELOG] {i} page...")
-    #     else:
-    #         print("[ELOG] pages...")
-
-
-    # def get_vacancy(self, idx):
-    #     return self.get_json(f"vacancies/{idx}")
-
-
-    # def get_idxs(self):
-    #     if len(self.vacancies) > 0:
-    #         return [item["id"] for item in self.vacancies]
-
-
-    # def full_vacancies(self, idxs=[]):
-    #     self.vacancies = []
-    #     if len(idxs) > 0:
-    #         for i in tqdm(idxs):
-    #             json_data = self.get_vacancy(i)
-    #             if json_data:
-    #                 self.vacancies.append(json_data)
-    #             else:
-    #                 print("[ELOG] full vacancies...")
-    #     else:
-    #         print("[LOG] 0 vacancies")
 
 
     def get_pages(self, params={}):
@@ -96,7 +50,7 @@ class Parser:
         async with session.get(f"{self.www}vacancies/{idx}", timeout=self.timeout) as res:
             if self.status_200(res.status):
                 self.vacancies.append(await res.json())
-                print(f"{len(self.vacancies):04} / {len(self.idxs)} \r", end="")
+                print(f"{len(self.vacancies)} / {len(self.idxs)} \r", end="")
 
 
     async def async_full_vacancies(self, idxs=[]):
@@ -116,21 +70,12 @@ class Parser:
     async def async_get_idxs(self, pages, params={}):
         self.idxs = []
         async with ClientSession(headers=self.headers) as sess:
-            tasks = []
-            for page in range(pages//2):
-                tasks.append(self.async_get_page_idxs(sess, params, page))
-            await asyncio.gather(*tasks)
-            tasks = []
-            for page in range(pages//2, page):
-                tasks.append(self.async_get_page_idxs(sess, params, page))
-            await asyncio.gather(*tasks)
-
-
-    async def main(self, params={}):
-        pages = self.get_pages(params)
-        await self.async_get_idxs(pages, params)
-        sleep(10)
-        await self.async_full_vacancies(self.idxs)
+            step = pages // 10
+            for i in range(0, pages, step):
+                tasks = []
+                for page in range(i, i + step):
+                    tasks.append(self.async_get_page_idxs(sess, params, page))
+                await asyncio.gather(*tasks)
 
 
     def get_vacancies(self, idxs):
@@ -143,7 +88,7 @@ class Parser:
         return self.idxs
 
     
-    def __call__(self, params):
-        self.run(params)
+    def __call__(self, idxs):
+        self.run(self.async_full_vacancies(idxs))
         return self.vacancies
 
