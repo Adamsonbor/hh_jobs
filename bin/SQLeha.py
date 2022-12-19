@@ -8,6 +8,8 @@ class Base:
     def __init__(self, conn):
         self.conn = conn
         self.cursor = conn.cursor()
+        self._strcolumns = " ,".join(self._columns)
+        self._strfcolumns = ", ".join(['%s' for _ in range(len(self._columns))])
 
 
     def commit(self):
@@ -26,8 +28,7 @@ class Base:
             raise AttributeError("[ELOG] too few args")
         if args[0] != None:
             self.cursor.execute(f"""
-                INSERT INTO {self} ({" ,".join(self._columns)}) VALUES
-                ({", ".join(['%s' for _ in range(len(self._columns))])})
+                INSERT INTO {self} ({self._strcolumns}) VALUES ({self._strfcolumns})
                                 """, tuple(args))
     
 

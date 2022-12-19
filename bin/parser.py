@@ -43,14 +43,14 @@ class Parser:
             if self.status_200(res.status):
                 json_data = await res.json()
                 self.idxs.extend([str(item["id"]) for item in json_data["items"]])
-                print(f"{len(self.idxs):04} / {self.pages * 20} \r", end="")
+                print(f"async_get_idxs >>> {len(self.idxs)} / {self.pages * 20} \t\t\r", end="")
 
 
     async def async_get_vacancy(self, session, idx):
         async with session.get(f"{self.www}vacancies/{idx}", timeout=self.timeout) as res:
             if self.status_200(res.status):
                 self.vacancies.append(await res.json())
-                print(f"{len(self.vacancies)} / {len(self.idxs)} \r", end="")
+                print(f"async_get_vacancy >>> {len(self.vacancies)} / {len(self.idxs)} \t\t\r", end="")
 
 
     async def async_full_vacancies(self, idxs=[]):
