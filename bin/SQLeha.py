@@ -184,11 +184,12 @@ class SQLeha:
 
     
     def __call__(self, json_list):
+        print("DB... ", " " * 40)
         idxs = self.vacancy.get("id")
         json_list = [item for item in json_list if item["id"] not in idxs]
         for item in json_list:
             self.save(item)
-        print(f"{len(json_list)} saved! \t\t\t\t")
+        print(f"{len(json_list)} saved!", " " * 40)
 
 
     def __del__(self):
