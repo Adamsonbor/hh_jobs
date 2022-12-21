@@ -188,7 +188,7 @@ class SQLeha:
         json_list = [item for item in json_list if item["id"] not in idxs]
         for item in json_list:
             self.save(item)
-        print(f"{len(json_list)} saved! _____")
+        print(f"{len(json_list)} saved! \t\t\t\t")
 
 
     def __del__(self):
